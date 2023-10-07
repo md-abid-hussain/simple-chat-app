@@ -23,15 +23,30 @@ app.get('/',(req,res)=>{
 
 socketIO.on('connection',(socket)=>{
     console.log(`User ${socket.id} connected`)
-    
+
+    // Upon connection - only user
+
+    socket.emit('message',"Welcome to chat app")
+
+    // Upon connection - to all user
+    socket.broadcast.emit('message',`User ${socket.id.substring(0,5)} connected`)
+
+    // Listening for message event
     socket.on('message',(data)=>{
         const parseData = JSON.parse(data)
-        parseData.username = parseData.username || socket.id.substring(0,5).toUpperCase()
+        parseData.username = socket.id.substring(0,5).toUpperCase()
         socketIO.emit('chat message',JSON.stringify(parseData))
     })
 
+    // When user disconnect
     socket.on('disconnect',()=>{
-        console.log(`User ${socket.id} disconnected`)
+        console.log('disconnected')
+        socket.broadcast.emit('message',`User ${socket.id.substring(0,5)} disconnected`)
+    })
+
+    // Listen for an activity
+    socket.on('activity',(name)=>{
+        socket.broadcast.emit('activity',name)
     })
 })
 
