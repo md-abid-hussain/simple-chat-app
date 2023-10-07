@@ -84,3 +84,9 @@ li:nth-child(odd) {
     font-size: 1.1rem;
     color:#eee;
 }
+
+.activity{
+    padding: 0.5rem;
+    font-style: italic;
+    font-weight: bold;
+}
