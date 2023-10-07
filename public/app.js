@@ -1,23 +1,20 @@
 const socket = io()
-let username = localStorage.getItem("username")
 
-if(!username){
-    username = prompt('Please enter username')
-    localStorage.setItem("username",username)
-}
-let msg = 0;
+const msgInput = document.querySelector('input')
+const activityState = document.querySelector('.activity')
+const welcome = document.querySelector('.welcome')
+
 function sendMessage(e) {
     e.preventDefault()
-    const input = document.querySelector('input')
-    console.log(input.value)
-    if (input.value) {
+    console.log(msgInput.value)
+    if (msgInput.value) {
         socket.emit('message',JSON.stringify({
-            username:username,
-            message:input.value
+            username:socket.id.substring(0,5),
+            message:msgInput.value
         }))
-        input.value = ""
+        msgInput.value = ""
     }
-    input.focus()
+    msgInput.focus()
 }
 
 document.querySelector('form')
@@ -25,6 +22,7 @@ document.querySelector('form')
 
 // Listen for messages 
 socket.on("chat message", ( data ) => {
+    activityState.textContent=''
     const parseData = JSON.parse(data)
     const li = document.createElement('li')
 
@@ -40,4 +38,28 @@ socket.on("chat message", ( data ) => {
     li.appendChild(message)
     document.querySelector('ul').appendChild(li)
     window.scrollTo(0, document.body.scrollHeight);
+})
+
+msgInput.addEventListener('keypress',()=>{
+    socket.emit('activity',socket.id.substring(0,5))
+})
+
+socket.on('activity',(name)=>{
+    activityState.textContent = `${name} is typing.....`
+    setTimeout(()=>{
+        activityState.textContent = ''
+    },3000)
+})
+
+socket.on('message',(data)=>{
+    const li = document.createElement('li')
+    li.textContent = data
+    document.querySelector('ul').appendChild(li)
+})
+
+socket.on('disconnect',(data)=>{
+    console.log('ddd')
+    const li = document.createElement('li')
+    li.textContent = data
+    document.querySelector('ul').appendChild(li)
 })
